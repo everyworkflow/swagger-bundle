@@ -37,7 +37,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarPrototype()
                             ->end()
                         ->end()
-                        ->scalarNode('version')->defaultValue('text_field')->end()
+                        ->scalarNode('version')->defaultValue('0.1')->end()
                     ->end()
                 ->end()
                 ->arrayNode('externalDocs')

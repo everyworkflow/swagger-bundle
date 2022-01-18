@@ -1,0 +1,9 @@
+swagger:
+    info:
+        title: EveryWorkflow API
+        description: EveryWorkflow API documentation
+        contact:
+            email: everyworkflow@gmail.com
+    servers:
+        url: https://petstore.swagger.io/v2
+        url2: http://petstore.swagger.io/v2

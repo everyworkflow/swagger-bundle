@@ -21,5 +21,6 @@ return function (ContainerConfigurator $configurator) {
         ->load('EveryWorkflow\\SwaggerBundle\\', '../../*')
         ->exclude('../../{DependencyInjection,Resources,Support,Tests}');
 
-    $services->set(SwaggerGenerator::class)->arg('$router', service('router'));
+    $services->set(SwaggerGenerator::class)
+        ->arg('$router', service('router'));
 };

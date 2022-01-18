@@ -12,37 +12,36 @@ use EveryWorkflow\CoreBundle\Annotation\EwRoute;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class SwaggerGenerator implements SwaggerGeneratorInterface
 {
     protected Router $router;
-    protected RequestStack $requestStack;
+    protected SwaggerConfigProviderInterface $configProvider;
 
     public function __construct(
         Router $router,
-        RequestStack $requestStack
+        SwaggerConfigProviderInterface $configProvider
     ) {
         $this->router = $router;
-        $this->requestStack = $requestStack;
+        $this->configProvider = $configProvider;
     }
 
     public function generate(): SwaggerData
     {
+        $config = $this->configProvider->get() ?? [];
+        if (isset($config['servers']) && is_array($config['servers'])) {
+            $servers = [];
+            foreach ($config['servers'] as $server) {
+                $servers[] = [
+                    'url' => $server,
+                ];
+            }
+            $config['servers'] = $servers;
+        }
         $swaggerData = new SwaggerData([
             'openapi' => '3.0.1',
             'info' => [
-                'title' => 'EveryWorkflow API',
-                'description' => 'EveryWorkflow API documentation',
                 'version' => '0.1',
-                'contact' => [
-                    'email' => 'everyworkflow@gmail.com',
-                ],
-            ],
-            'servers' => [
-                [
-                    'url' => $this->requestStack->getMainRequest()->getSchemeAndHttpHost(),
-                ],
             ],
             'components' => [
                 'securitySchemes' => [
@@ -53,6 +52,7 @@ class SwaggerGenerator implements SwaggerGeneratorInterface
                     ]
                 ],
             ],
+            ...$config,
         ]);
 
         $this->addControllerData($swaggerData);

@@ -12,32 +12,40 @@ use EveryWorkflow\CoreBundle\Annotation\EwRoute;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class SwaggerGenerator implements SwaggerGeneratorInterface
 {
     protected Router $router;
+    protected RequestStack $requestStack;
     protected SwaggerConfigProviderInterface $configProvider;
 
     public function __construct(
         Router $router,
+        RequestStack $requestStack,
         SwaggerConfigProviderInterface $configProvider
     ) {
         $this->router = $router;
+        $this->requestStack = $requestStack;
         $this->configProvider = $configProvider;
     }
 
     public function generate(): SwaggerData
     {
         $config = $this->configProvider->get() ?? [];
+        $servers = [
+            [
+                'url' => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost(),
+            ]
+        ];
         if (isset($config['servers']) && is_array($config['servers'])) {
-            $servers = [];
             foreach ($config['servers'] as $server) {
                 $servers[] = [
                     'url' => $server,
                 ];
             }
-            $config['servers'] = $servers;
         }
+        $config['servers'] = $servers;
         $swaggerData = new SwaggerData([
             'openapi' => '3.0.1',
             'info' => [
@@ -125,7 +133,7 @@ class SwaggerGenerator implements SwaggerGeneratorInterface
             foreach ($method->getAttributes() as $attribute) {
                 if ($attribute->getName() === EwRoute::class) {
                     $attrArgs = $attribute->getArguments();
-                    if ($attrArgs['name'] === $routeName && isset($attrArgs['swagger'])) {
+                    if (isset($attrArgs['name']) && $attrArgs['name'] === $routeName && isset($attrArgs['swagger'])) {
                         $swaggerData = $attrArgs['swagger'];
                         if (!is_array($swaggerData)) {
                             $swaggerData = [];

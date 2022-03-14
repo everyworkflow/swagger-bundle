@@ -175,8 +175,10 @@ class SwaggerGenerator implements SwaggerGeneratorInterface
                             }
                         }
                         if (
-                            !isset($swaggerData['responses']) ||
-                            (isset($swaggerData['responses']) && !isset($swaggerData['responses'][200]))
+                            $method->getReturnType() && (
+                                !isset($swaggerData['responses']) ||
+                                (isset($swaggerData['responses']) && !isset($swaggerData['responses'][200]))
+                            )
                         ) {
                             if ($method->getReturnType()->getName() === JsonResponse::class) {
                                 $swaggerData['responses'][200] = [
